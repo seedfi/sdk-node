@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "noImplicitAny": true,
+    "noImplicitAny": false, // CHANGE
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
@@ -12,6 +12,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "index.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

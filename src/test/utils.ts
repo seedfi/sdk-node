@@ -1,6 +1,8 @@
 'use strict';
+import { MerchantAuthenticationType }from "../lib/types"
+import constants from "./constants"
 
-function getRandomString(text){
+function getRandomString(text: string){
 	return text + Math.floor((Math.random() * 100000) + 1);
 }
 
@@ -16,9 +18,15 @@ function getDate(){
 	return (new Date()).toISOString().substring(0, 10) ;
 }
 
+const merchantAuthentication: MerchantAuthenticationType = {
+    name: constants.apiLoginKey,
+    transactionKey: constants.transactionKey,
+  };
+
 export default {
 	getRandomString,
 	getRandomInt,
 	getRandomAmount,
-	getDate
+	getDate,
+	merchantAuthentication,
 }

@@ -3,9 +3,19 @@ import request from 'request';
 import { logger }from './logger';
 import { config } from './config';
 import constants from './constants';
+import { ANetApiRequest } from './types';
+ 
+function lowercaseFirstLetter(s: string) {
+	return s.charAt(0).toLowerCase() + s.slice(1);
+  }
 
-class APIOperationBase {
-	constructor(apiRequest) {
+
+export default class APIOperationBase {
+	_request: any;
+	_response: any;
+	_endpoint: string;
+
+	constructor(apiRequest: ANetApiRequest) {
 		logger.debug('Enter APIOperationBase constructor');
 
 		this._request = null;
@@ -15,7 +25,9 @@ class APIOperationBase {
 		if(null == apiRequest)
 			logger.error('Input request cannot be null');
 
-		this._request = apiRequest;
+		this._request = {
+			[lowercaseFirstLetter(this.getRequestType())]: apiRequest
+		};
 
 		logger.debug('Exit APIOperationBase constructor');
 	}
@@ -24,6 +36,11 @@ class APIOperationBase {
 	validateRequest(){
 		return;
 	}
+
+	//abstract
+	getRequestType(): string {
+		return "NOT_IMPLEMENTED"
+	};
 
 	validate(){
 		return;
@@ -57,39 +74,37 @@ class APIOperationBase {
 
 	setClientId() {
 		for(var obj in this._request){
-			this._request[obj]['clientId'] = config.clientId; 
+			// this._request[obj]['clientId'] = config.clientId; 
+			this._request[obj]['clientId'] = null; 
 			break;
 		}
 	}
 
-	setEnvironment(env){
+	setEnvironment(env: string){
 		this._endpoint = env;
 	}
 
-	execute(callback) {
+	execute(callback: Function) {
 		logger.debug('Enter APIOperationBase execute');
 
 		logger.debug('Endpoint : ' + this._endpoint);
 
 		this.beforeExecute();
 
-		this.setClientId();
+		// this.setClientId();
 
 		var obj = this;
 
-		logger.debug(JSON.stringify(this._request, 2, null));
+		logger.debug(JSON.stringify(this._request));
 
 		var reqOpts = {
 			url: this._endpoint,
 			method: 'POST',
 			json: true,
 			timeout: config.timeout,
-			body: this._request
+			body: this._request,
+			...(config.proxy.setProxy && {proxy: config.proxy.proxyUrl})
 		};
-
-		if(config.proxy.setProxy){
-			reqOpts['proxy'] = config.proxy.proxyUrl;
-		}
 
 		request(reqOpts, function(error, response, body){
 			if(error) {
@@ -99,7 +114,7 @@ class APIOperationBase {
 				//TODO: slice added due to BOM character. remove once BOM character is removed.
 				if(typeof body!=='undefined'){
 					var responseObj = JSON.parse(body.slice(1));
-					logger.debug(JSON.stringify(responseObj, 2, null));
+					logger.debug(JSON.stringify(responseObj));
 					obj._response = responseObj;
 				/*
 				var jsonResponse = JSON.stringify(body);
@@ -120,5 +135,3 @@ class APIOperationBase {
 		logger.debug('Exit APIOperationBase execute');
 	}
 }
-
-module.exports.APIOperationBase = APIOperationBase;

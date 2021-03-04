@@ -1,9 +1,11 @@
-import APIContracts from "./apicontracts"
-import APIControllers from "./apicontrollers"
+// import APIContracts from "./apicontracts"
+import ApiControllers from "./apicontrollers"
 import Constants from "./constants"
 
+console.log(ApiControllers)
+
 export {
-	APIContracts,
-    APIControllers,
+	// APIContracts,
+    ApiControllers,
 	Constants,
 }
